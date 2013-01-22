@@ -1,0 +1,86 @@
+###########################
+# Place this in ~/.chitinrc
+# This is mine. Feel free to screw with this as you please.
+# - Ari Brown
+###########################
+include Math
+
+module Aliases
+  def src; cd "#{ENV['HOME']}/src"; end
+  def school; cd "/Users/ari/School/Fall '11/"; end
+  def idea; vim '/Users/ari/src/IDEAS'; end
+  def ideas; less '/Users/ari/src/IDEAS'; end
+  def vpython(*args)
+    Executable.new '/Library/Frameworks/Python.framework/Versions/2.7/bin/python', *args
+  end
+  def fixit; vim '/Users/ari/.chitinrc'; end
+  def ouvrez(*args)
+    Executable.new '/usr/bin/open', *args
+  end
+end
+include Aliases
+
+def normal_prompt
+  "#{ENV['USER'].cyan}: #{short_pwd.yellow} (... "
+end
+
+def prompt
+  normal_prompt
+end
+
+def relax
+  def prompt
+    normal_prompt
+  end
+end
+
+def focus(string)
+  @todo = string
+  def prompt
+    @todo = @todo.to_s
+    "[ #{@todo.red} #{'-' * (`tput cols`.to_i - 4 - @todo.red.size)}]\n" +
+    "[ #{short_pwd.light_cyan} ] "
+  end
+end
+
+pre_process do |val|
+  val = val.strip == '.'  ? 'exit' : val
+  val = val.strip == '..' ? 'cd ".."' : val
+end
+
+# Sample usage of pre_process and post_process.
+# This is taken from the lib/chitin/commands/builtins.rb
+#
+# pre_process do |val|
+#   # if there is an unclosed string, close it and run it again.
+#   # smart compilers are bad... but this ain't a compiler
+#   #
+#   # option: make it ask for confirmation first
+#   # settable in chitinrc, perjaps?
+#   if (e = syntax_error_for(val)) &&
+#      e.message =~ /unterminated string meets end of file/
+# 
+#     if syntax_error_for(val + '\'')
+#       unless syntax_error_for(val + '"')
+#         val << '"'
+#       end
+#     else
+#       val << '\''
+#     end
+# 
+#   end
+# 
+#   val
+# end
+# 
+# # You can use error classes as a name and if the error comes up,
+# # block of code will be run.
+# # 
+# # post_process SyntaxError do |e, val|
+# #   # sample
+# # end
+# 
+# post_process :color do |val|
+#   Wirble::Colorize.colorize val
+# end
+

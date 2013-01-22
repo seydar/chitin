@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+# fuck, this isn't my method. i don't know where i got it. please don't hate me!
+def follow_link(file)
+  file = File.expand_path(file)
+  while File.symlink?(file)
+    file = File.expand_path(File.readlink(file), File.dirname(file))
+  end
+  file
+end
+
+require File.join(File.dirname(follow_link(__FILE__)), "..", "lib", "chitin")
+
+if ARGV[0]
+  rc = ARGV[0]
+else
+  FileUtils.touch File.expand_path('~/.chitinrc')
+  rc = File.expand_path('~/.chitinrc')
+end
+
+Chitin::Builtins.class_eval File.read(rc)
+
+SESSION = Chitin::Session.new Chitin::Builtins
+SESSION.start
+

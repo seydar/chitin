@@ -1,0 +1,187 @@
+Script started on Sat Nov  3 15:03:39 2012
+[ari: ~/src/chitin] bin/chitin
+ari: ~/src/chitin (... # hey kids, let's talk about chitin
+ari: ~/src/chitin (... # chitin is a shell
+ari: ~/src/chitin (... # chitin is also ruby
+ari: ~/src/chitin (... # everything you type in chitin is pure ruby
+ari: ~/src/chitin (... 1 + 4
+ => 5
+ari: ~/src/chitin (... # that said, this is a shell
+ari: ~/src/chitin (... ls
+FEATURES  NOTES   README    TODO    bin   chitinrc  lib   sample.txt  typescript
+ari: ~/src/chitin (... # and it can do some fancy footwork, too
+ari: ~/src/chitin (... strange = ls -:al
+total 224
+drwxr-xr-x  12 ari  staff    408 Nov  3 15:03 .
+drwxr-xr-x  66 ari  staff   2244 Oct 31 15:36 ..
+drwxr-xr-x  13 ari  staff    442 Nov  3 14:54 .hg
+-rw-r--r--   1 ari  staff     91 Jul 15  2011 FEATURES
+-rw-r--r--   1 ari  staff    789 Sep  2  2011 NOTES
+-rw-r--r--   1 ari  staff   5349 Jun 24  2011 README
+-rw-r--r--   1 ari  staff    913 Oct 20 17:05 TODO
+drwxr-xr-x   3 ari  staff    102 Oct 22 17:31 bin
+-rw-r--r--   1 ari  staff   1784 Feb 21  2012 chitinrc
+drwxr-xr-x   4 ari  staff    136 Oct 17 11:17 lib
+-rw-r--r--   1 ari  staff   5767 Nov  3 14:54 sample.txt
+-rw-r--r--   1 ari  staff  77935 Nov  3 15:05 typescript
+ari: ~/src/chitin (... strange
+total 224
+drwxr-xr-x  12 ari  staff    408 Nov  3 15:03 .
+drwxr-xr-x  66 ari  staff   2244 Oct 31 15:36 ..
+drwxr-xr-x  13 ari  staff    442 Nov  3 14:54 .hg
+-rw-r--r--   1 ari  staff     91 Jul 15  2011 FEATURES
+-rw-r--r--   1 ari  staff    789 Sep  2  2011 NOTES
+-rw-r--r--   1 ari  staff   5349 Jun 24  2011 README
+-rw-r--r--   1 ari  staff    913 Oct 20 17:05 TODO
+drwxr-xr-x   3 ari  staff    102 Oct 22 17:31 bin
+-rw-r--r--   1 ari  staff   1784 Feb 21  2012 chitinrc
+drwxr-xr-x   4 ari  staff    136 Oct 17 11:17 lib
+-rw-r--r--   1 ari  staff   5767 Nov  3 14:54 sample.txt
+-rw-r--r--   1 ari  staff  77935 Nov  3 15:05 typescript
+ari: ~/src/chitin (... # let's get funky now
+ari: ~/src/chitin (... hg.stat
+M lib/chitin/commands/builtins.rb
+M lib/chitin/sandbox.rb
+M lib/chitin/session.rb
+? typescript
+ari: ~/src/chitin (... # that's the equivalent to "hg stat"
+ari: ~/src/chitin (... # to supply arguments, -m becomes :m
+ari: ~/src/chitin (... # because single-character symbols get a single "-" prepended
+ari: ~/src/chitin (... # we can even use hash notation to make the meaning clearer!
+ari: ~/src/chitin (... # esimerkki:
+ari: ~/src/chitin (... hg.commit "lib/chitin :m => 'fixed the processing of comments'
+ari: ~/src/chitin (... hg.commit "lib/chitin/commands/ :m => 'fixed the processing of comments'
+ari: ~/src/chitin (... hg.commit "lib/chitin/commands/ :m => 'fixed the processing of comments'
+ari: ~/src/chitin (... hg.commit "lib/chitin/sandbox.rb", "lib/chitin :m => 'fixed the processing of comments'
+ari: ~/src/chitin (... hg.commit "lib/chitin/sandbox.rb", "lib/chitin/session.rb", :m => 'fixed the processing of comments'
+ari: ~/src/chitin (... # we even used tab completion!
+ari: ~/src/chitin (... hg.stat
+M lib/chitin/commands/builtins.rb
+? typescript
+ari: ~/src/chitin (... hg.commit :m => 'added shortcut for globbing all files in a directory
+ari: ~/src/chitin (... # BOOM chitin automagically completes dangling quotes
+ari: ~/src/chitin (... # single quotes get replaced by double quotes during tab completion. they otherwise are the same
+ari: ~/src/chitin (... hg.outgoing
+comparing with https://seydar:***@bitbucket.org/seydar/chitin
+searching for changes
+changeset:   95:ca86ab0ce282
+user:        seydar
+date:        Sat Nov 03 15:08:25 2012 -0400
+summary:     fixed the processing of comments
+
+changeset:   96:02f78443e821
+tag:         tip
+user:        seydar
+date:        Sat Nov 03 15:08:51 2012 -0400
+summary:     added shortcut for globbing all files in a directory
+
+ari: ~/src/chitin (... hg.push
+pushing to https://seydar:***@bitbucket.org/seydar/chitin
+searching for changes
+remote: adding changesets
+remote: adding manifests
+remote: adding file changes
+remote: added 2 changesets with 3 changes to 3 files
+remote: bb/acl: seydar is allowed. accepted payload.
+ari: ~/src/chitin (... cat "/Users/ari/.chitin
+ari: ~/src/chitin (... cat "/Users/ari/.chitinrc"
+include Math
+
+module Aliases
+  def src; cd "#{ENV['HOME']}/src"; end
+  def school; cd "/Users/ari/School/Fall '12/"; end
+  def idea; vim '/Users/ari/src/IDEAS'; end
+  def ideas; less '/Users/ari/src/IDEAS'; end
+  def fixit; vim '/Users/ari/.chitinrc'; end
+  def ouvrez(*args)
+    Executable.new '/usr/bin/open', *args
+  end
+end
+include Aliases
+
+module Shells
+  def wilma; ssh 'arizzle@wilma.eecs.umich.edu'; end
+  def caen; ssh 'arizzle@login.engin.umich.edu'; end
+end
+include Shells
+
+def normal_prompt
+  "#{ENV['USER'].cyan}: #{short_pwd.yellow} (... "
+end
+
+def prompt
+  normal_prompt
+end
+
+def relax
+  def prompt
+    normal_prompt
+  end
+end
+
+def focus(string)
+  @todo = string
+  def prompt
+    @todo = @todo.to_s
+    "[ #{@todo.red} #{'-' * (STDIN.winsize[1].to_i - 4 - @todo.red.size)}]\n" +
+    "[ #{short_pwd.light_cyan} ] "
+  end
+end
+
+pre_process do |val|
+  val = val.strip == '.'  ? 'exit' : val
+  val = val.strip == '..' ? 'cd ".."' : val
+end
+
+ari: ~/src/chitin (... # I've got a shortcut there that allows me to do this:
+ari: ~/src/chitin (... ..
+ => "/Users/ari/src"
+ari: ~/src (... # whoops i just printed a big directory... probs gonna cut that out of the final edit of this
+ari: ~/src (... cd
+ => "/Users/ari"
+ari: ~ (... cd "/tmp/
+ => "/private/tmp"
+ari: /private/tmp (... ['hello', 'waddap', 'test'].each {|f| touch f }
+ => ["hello", "waddap", "test"]
+ari: /private/tmp (... ll
+total 0
+-rw-r--r--@ 1 ari  wheel     0B Oct 31 16:48 geplugin_introspect_install_mutex
+srwxr-xr-x  1 ari  wheel     0B Oct 26 18:10 ics1355
+srwxr-xr-x  1 ari  wheel     0B Oct 26 09:05 icssuis501
+drwx------  3 ari  wheel   102B Oct 26 09:04 launch-dtJObz
+drwx------  3 ari  wheel   102B Oct 26 09:04 launch-fpTAKt
+drwx------  3 ari  wheel   102B Oct 26 09:04 launch-omlDku
+drwx------  3 ari  wheel   102B Oct 26 09:04 launchd-100.Rcleky
+drwx------  3 ari  wheel   102B Nov  3 11:51 tmux-501
+ari: /private/tmp (... # oh no! no files! that's because a command is an executable that is only run if it is returned from the prompt.
+ari: /private/tmp (... touch.inspect
+ => "#<Executable:0x000001008a5f60 @path="/usr/bin/touch", @args=[]>"
+ari: /private/tmp (... # luckily, arrays of executables are also run. SOOOOOOOOOOOOO
+ari: /private/tmp (... ['hello', 'waddap', 'test'].map {|f| touch f }
+ari: /private/tmp (... ll
+total 0
+-rw-r--r--@ 1 ari  wheel     0B Oct 31 16:48 geplugin_introspect_install_mutex
+-rw-r--r--  1 ari  wheel     0B Nov  3 15:14 hello
+srwxr-xr-x  1 ari  wheel     0B Oct 26 18:10 ics1355
+srwxr-xr-x  1 ari  wheel     0B Oct 26 09:05 icssuis501
+drwx------  3 ari  wheel   102B Oct 26 09:04 launch-dtJObz
+drwx------  3 ari  wheel   102B Oct 26 09:04 launch-fpTAKt
+drwx------  3 ari  wheel   102B Oct 26 09:04 launch-omlDku
+drwx------  3 ari  wheel   102B Oct 26 09:04 launchd-100.Rcleky
+-rw-r--r--  1 ari  wheel     0B Nov  3 15:14 test
+drwx------  3 ari  wheel   102B Nov  3 11:51 tmux-501
+-rw-r--r--  1 ari  wheel     0B Nov  3 15:14 waddap
+ari: /private/tmp (... # and boom goes the dynamite
+ari: /private/tmp (... hg.inspect
+ => "#<Executable:0x00000100a65328 @path="/usr/local/bin/hg", @args=[]>"
+ari: /private/tmp (... hg.stat.inspect
+ => "#<Executable:0x00000100a49d58 @path="/usr/local/bin/hg", @args=["stat"]>"
+ari: /private/tmp (... hg.commit(:m => 'my message').inspect
+ => "#<Executable:0x000001009e6e10 @path="/usr/local/bin/hg", @args=["commit", "-m", "my message"]>"
+ari: ~/src/chitin (... f = open 'new_sample.txt.stripped', 'w'
+ => #<File:new_sample.txt.stripped>
+ari: ~/src/chitin (... cat('new_sample.txt') | each_line {|line| f.puts line.rstrip }
+... <snipped> ...
+ari: ~/src/chitin (... # and now let's turn up the heat to showcase chitin's power
+ari: ~/src/chitin (... cat('sample.txt') | map_lines {|l| l.rstrip } > 'oot.txt'
+

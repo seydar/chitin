@@ -1,0 +1,83 @@
+chitin
+========================
+by Ari Brown
+http://bitbucket.org/seydar/chitin
+
+% gem install chitin  # for bash
+
+Hai everybahdy
+
+== So what IS Chitin?
+
+Everything you type has to be valid Ruby.
+
+* Chitin is a Ruby interpreter
+* Turned into a shell.
+
+Everything you type has to be valid Ruby.
+
+I hope you all get the joke. I made it myself. The joke and the shell.
+
+Everything you type is Ruby -- remember that. So let's look at it in action.
+Remember that the tab completion makes typing quotes painless. Plus you don't
+even need closing quotes if they're the final character in a line:
+
+  % hg.commit :m => 'fixed issues with procs in pipes...
+  % hg.push
+  pushing to https://seydar:***@bitbucket.org/seydar/chitin
+  ...
+  remote: bb/acl: seydar is allowed. accepted payload.
+  % cat("ANNOUNCEMENT") | pbcopy
+  % ll
+  total 136
+  -rw-r--r--  1 ari  staff   1.7K Nov 25 14:43 ANNOUNCEMENT
+  ...
+  -rw-r--r--  1 ari  staff   7.7K Nov 24 20:44 sample.txt
+  % rm "chitin-1.0.1.gem"
+  % gem.build "chitin.gemspec"
+    Successfully built RubyGem
+    Name: chitin
+    Version: 1.0.1
+    File: chitin-1.0.1.gem
+  % vim "ANNOUNCEMENT"
+  % ll | grep('gem')
+  -rw-r--r--  1 ari  staff    24K Nov 25 14:49 chitin-1.0.1.gem
+  -rw-r--r--  1 ari  staff   883B Nov 21 14:43 chitin.gemspec
+  % ll | split("\n").map {|l| l.size }
+   => [9, 57, 51, 49, 48, 61, 59, 53, 48, 55]
+
+Everything you type has to be valid Ruby. I am repeating this because in
+test cases, this is the one thing that everybody forgot. You can use the
+text preprocessor to change this, of course, but it's up to you.
+
+== Why use it?
+
+Because it's written in Ruby and supadupes easy to modify. Also:
+
+  * The power of Ruby in a shell
+  * The command utility of a shell in Ruby
+  * Text processing is SO. MUCH. EASIER.
+  * A much more programmatic shell
+  * Prevents against accidental `rm -rf /usr /local/bin` like that one thing
+    we all saw on Reddit.
+  * Syntax highlighting while you type (thanks to Coolline!)
+  * You can do simple arithmetic on the command line without having to switch
+    interfaces (this was the original itch I had to scratch).
+  * No underlying shell usage
+  * Sweet tab completion
+  * No need to use closing quotes. If you need a final quote in a line, don't
+    sweat it. Chitin will take care of that.
+  * You can set key bindings to arbitrary keys
+  * Makes for a great Christmas present
+  * Great library for calling executable files from your own program without
+    shelling your soul or shelling out.
+
+Anyways, I really like it and find it useful. I much prefer it over Bash. I
+encourage you all to take a quick look at the README and maybe try it out
+yourselves.
+
+Hate mail welcome.
+
+- Ari/seydar
+ari@aribrown.com
+

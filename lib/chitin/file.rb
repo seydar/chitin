@@ -61,6 +61,10 @@ module Chitin
     def symlink?
       false
     end
+
+    def directory?
+      false
+    end
   end
 
   class FileObject < FSObject
@@ -132,18 +136,10 @@ module Chitin
     def inspect
       "#<Chitin::Directory #{path.inspect}>"
     end
+
+    def directory?
+      true
+    end
   end
-end
-
-module Kernel
-  def D(path); Chitin::Directory.new path; end
-  def F(path); Chitin::FileObject.new path; end
-  def S(path); Chitin::Symlink.new path; end
-
-  alias_method :d, :D
-  alias_method :f, :F
-  alias_method :s, :S
-
-  NULLIN = NULLOUT = NULLERR = File.open File::NULL
 end
 

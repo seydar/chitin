@@ -11,14 +11,13 @@ end
 
 require File.join(File.dirname(follow_link(__FILE__)), "..", "lib", "chitin")
 
-if ARGV[0]
-  rc = ARGV[0]
-else
-  FileUtils.touch File.expand_path('~/.chitinrc')
-  rc = File.expand_path('~/.chitinrc')
-end
+rc = ARGV[0] || File.expand_path('~/.chitinrc')
 
-Chitin::Builtins.class_eval File.read(rc)
+Chitin::Builtins.class_eval File.read(rc) if rc
+
+if rc && File.exists?(rc)
+  Chitin::Builtins.class_eval File.read(rc)
+end
 
 SESSION = Chitin::Session.new Chitin::Builtins
 SESSION.start

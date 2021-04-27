@@ -8,17 +8,28 @@ FUTURE:
     -> sharing of variables between chitin processes
 *   remove trailing whitespace from lines somehow. maybe as a final transformation when you hit enter?
 *   `other_ls = method(:ls)` would be cool. note that ls is mapped to a binary and is not actually a method
+*   pass environment to child processes
+*   tab complete ruby/shell things
+*   post_processing for shell commands
+    -> make it asynchronous and use pipes
+*   ability to 'neuter' a command, so that it won't automatically be run
+    -> i think i just did this in a commit (6/11/13)
+*   grep through history
+*   ability to pass objects to ruby programs without converting them to strings
 
 QUIRKS:
 *   menu doesn't erase itself sometimes
     -> cat and tabcomplete a file that is empty. output is correct but confusing
+*   does not play nice with GDB if it is called within the bash profile file
 
 FAILURES:
-*   `pdflatex("full.tex") > NULLOUT` fails to produce the PDF,
-    but `... > 'test'` works. weird.
-*   ^C on running ruby programs kills the whole interpreter... womp.
 *   slashes in filenames
 *   `include Math; sin(5)` fails
+*   too many open pipes
+    -> don't close them in the first place
+*   unable to do "STDIN > ls > NULLOUT ^ NULLERR"
+*   tab completion on # errors out and breaks chitin
+*   `[4 + 5, ll]` fails
 
 Questions:
 *   Why do you have to do @line = '' in Coolline in order to not affect the

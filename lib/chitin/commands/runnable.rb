@@ -132,7 +132,7 @@ module Chitin
     def reset; raise "Not Yet Implemented"; end
     def run; raise "Not Yet Implemented"; end
 
-    # Generally the same as +run+, except for the ruby commands
+    # Generally the same as +run+, except for the ruby commands.
     # they return real ruby that can be given back to the user.
     def raw_run
       run

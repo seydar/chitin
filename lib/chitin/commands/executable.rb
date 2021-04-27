@@ -1,5 +1,7 @@
 module Chitin
   class Executable
+    # this is needed to work in tandem with #method_missing.
+    # this will sweep all inherited methods BUT #[] under the rug.
     __sweep__ :[]
 
     include Runnable
@@ -9,12 +11,17 @@ module Chitin
 
       @path = path
       @args = process_args(args)
+      @suspended = false
     end
   
     # EVERYTHING will be sent to the command. ERRTHANG!!!!
     def method_missing(name, *arr, &blk)
-      setup name.to_s, *process_args(arr)
-      self
+      if @suspended
+        super(name, *arr, &blk)
+      else
+        setup name.to_s, *process_args(arr)
+        self
+      end
     end
 
     private
@@ -38,8 +45,21 @@ module Chitin
             [key, val]
           end
         else
-          #a = arg.is_a?(FSObject) ? arg.to_a : arg
-          #pp a.map(&:to_s) if arg.is_a? FSObject
+          # I'm leaving this here so that I know what went down in this
+          # battlefield. I tried automatically expanding FileObject globs, but
+          # that in conjunction with * means things get expanded twice,
+          # resulting in a lot of duplicates.
+          #
+          # Maybe an answer is to get rid of * and only do automatic expansion
+          # for executables.
+          #
+          # NO YOU CAN'T! What if you want to pass a directory to program that
+          # you have save as a Chitin::Directory? It would end up being globbed
+          # open which is NOT what you wanted. Globbing must be done explicitly.
+          #
+          # a = arg.is_a?(FSObject) ? arg.to_a : arg
+          # pp a.map(&:to_s) if arg.is_a? FSObject
+          # a
           arg
         end
       end
@@ -96,7 +116,14 @@ module Chitin
   
     def reset
       @opened = false
+
+      # these set them to nil (duh)
       self.in, self.out, self.err = nil
+
+      # so that THESE can then reopen them
+      set_in  STDIN
+      set_out STDOUT
+      set_err STDERR
     end
   
     def each_line
@@ -117,6 +144,21 @@ module Chitin
       end
     end
 
+    # Make it so you can treat it like a normal object.
+    # This stops method forwarding
+    def suspend
+      @suspended_methods = private_methods.dup
+      @suspended_methods.each {|m| public m }
+
+      @suspended = true
+    end
+
+    def unsuspend
+      @suspended_methods.each {|m| private m }
+      @suspended_methods = []
+      @suspended = false
+    end
+
     def inspect
       "#<Chitin::Executable #{super}>"
     end
@@ -126,7 +168,6 @@ module Chitin
   
       [path, *arr.flatten].join ' '
     end
-  
   end
 end
 

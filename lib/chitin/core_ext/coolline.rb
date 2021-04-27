@@ -49,8 +49,11 @@ class Coolline
   # In tests, this reads the first character of buffered input.
   # In practice, this does not do anything differently than `@input.getch`
   # C'est la vie.
+  # Notice how I went back to `@input.getch`, since Roger Pack was saying
+  # that `@input.raw { @input.getc }` wasn't working on Windows.
   def read_char
-    @input.raw { @input.getc }
+    #@input.raw { @input.getc }
+    @input.getch
   end
 
   # This is here because the line:
@@ -67,7 +70,14 @@ class Coolline
   #
   # Also, @history_moved appears to be a useless variable.
   def readline(prompt = ">> ")
-    @prompt = prompt
+    lines = prompt.split("\n")
+
+    if lines.size == 1
+      @prompt = prompt
+    else
+      puts lines[0..-2]
+      @prompt = lines.last
+    end
 
     @history.delete_empty
 

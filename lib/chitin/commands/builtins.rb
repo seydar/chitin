@@ -1,5 +1,6 @@
 # Things are contained in modules or functions so that they play well with
 # code folding.
+# Picked up that trick from Sinatra
 
 require 'etc'
 ENV['USER'] ||= Etc.getlogin
@@ -45,14 +46,19 @@ module Chitin
       end
     end
 
-    # L for Lambda. Creates a proc as a RubyMethod
-    def L(&block)
-      StringMethod.new :bottle, &block
-    end
-
     # ruby's backtick doesn't chomp off the newline, which makes it more
     # or less useless for piping into other commands
-    def `(args); super(args).chomp; end
+    def `(*args)
+      res = eval args.join
+
+      if Runnable === res
+        composed = res | L {|str| str }
+        res = composed[:raw_run].chomp
+        composed[:wait]
+      end
+
+      res.to_s
+    end
 
     # Place the last argument on the line
     # This is a total hack. It would need proper parsing to accomodate for
@@ -74,6 +80,17 @@ module Chitin
               ["'", '"'].include?(c.line[beg..last][-1, 1]))
         c.line[beg..last] = '"' + c.line[beg..last] + '"'
         c.pos = last + 3 # 2 for the quotes and 1 for the cursor
+      end
+    end
+
+    # Do nothing. this is so that we don't accidentally delete a word we're trying to quote
+    bind(?\C-w) {}
+
+    # Automatically add *f(..) around something
+    bind ?\C-f do |c|
+      if beg = c.word_beginning_before(c.pos) and last = c.word_end_before(c.pos)
+        c.line[beg..last] = '*f(' + c.line[beg..last] + ')'
+        c.pos = last + 5 # 4 for the characters and 1 for the cursor
       end
     end
 
@@ -103,6 +120,41 @@ module Chitin
       def prompt
         "#{ENV['USER']}: #{short_pwd} % "
       end
+
+      # Get the elapsed time of the last command.
+      def last_elapsed
+        SESSION.last_elapsed || 0.0
+      end
+
+      def last_elapsed_formatted
+        hours = (last_elapsed / 3600).floor
+        min   = ((last_elapsed - 3600 * hours) / 60).floor
+        sec   = last_elapsed - 3600 * hours - 60 * min
+
+        if hours > 0
+          "%02d:%02d:%f" % [hours, min, sec]
+        elsif min > 0
+          "%02d:%f" % [min, sec]
+        else
+          "%f" % sec
+        end
+      end
+
+      # My personal fancy shell.
+      # On the first line it has the time, elapsed time of the last
+      # run command, and the shortened working directory.
+      # On the second line, it has three colored dots.
+      def time_elapsed_working_multiline_prompt
+        "(".purple + Time.now.to_s + ") ".purple +
+          "(".purple + "last => " + "#{last_elapsed_formatted}".cyan + ") ".purple +
+          "(".purple + short_pwd.yellow + ")\n".purple +
+          '.'.red + '.'.yellow + '.'.cyan + ' '
+      end
+
+      # Minimalist.
+      def minimalist_prompt
+        '.'.red + '.'.yellow + '.'.cyan + ' '
+      end
     end
     include Prompts
   
@@ -122,15 +174,31 @@ module Chitin
       def x; exeunt; end
       def c; clear; end
   
+      # required because `gem` is a ruby method as well
       def gem(*a); raw_exec("gem", *a); end
       def all; D('.'); end
 
       def to_num; L {|i| i.to_i }; end
+      def p(*args)
+        args.map do |arg|
+          if Runnable === arg
+            puts arg[:inspect]
+          else
+            puts arg.inspect
+          end
+        end
+
+        # i know puts returns nil and p returns the object, but this is to
+        # emphasize the fact that we want it to return nil. also, so that
+        # we don't accidentally run a Runnable while inspecting it
+        nil 
+      end
     end
     include Aliases
     
-    # Fixnum math is now floating-point math
-    class ::Fixnum
+    # Integer math is now floating-point math
+    # hashtag gitonmahlevel
+    class ::Integer
       alias_method :old_div, :/
       
       def /(other)
@@ -140,8 +208,6 @@ module Chitin
   
     module ExecutableBinaries
       # Executable files
-      # Do them lazily because otherwise we could have a SHITTONNE of methods lying
-      # around in the objectspace
       COMMANDS = {}
       PRIORITY_METHODS = []
       def path_for_exec(name)
@@ -159,16 +225,8 @@ module Chitin
       end
       
       def method_missing(name, *args, &block)
-        if PRIORITY_METHODS.include? name
-          return StringMethod.new(name, *args, &block)
-        end
-  
-        if path_for_exec(name)
-          return Executable.new(path_for_exec(name), *args)
-        end
-  
-        if "".public_methods(false).include? name
-          return StringMethod.new(name, *args, &block)
+        if meth = lookup(name, *args, &block)
+          return meth
         end
       
         # If we made it this far, there is no executable to be had. Super it up.
@@ -180,6 +238,25 @@ module Chitin
       end
       alias_method :here, :raw_exec
       alias_method :h, :raw_exec
+
+      # This allows for `__/'disco` as `./disco`
+      def __; '.'; end
+
+      def lookup(name, *args, &block)
+        if PRIORITY_METHODS.include? name
+          return StringMethod.new(name, *args, &block)
+        end
+  
+        if path_for_exec(name)
+          return Executable.new(path_for_exec(name), *args)
+        end
+  
+        if "".public_methods(false).include? name
+          return StringMethod.new(name, *args, &block)
+        end
+
+        nil
+      end
     end
     include ExecutableBinaries
   

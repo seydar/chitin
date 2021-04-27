@@ -31,5 +31,43 @@ class String
   def /(other)
     Chitin::Executable.new File.join(self, other.to_s)
   end
+
+  def >>(other)
+    case other
+    when Chitin::FileObject
+      other.to_a.each do |fo|
+        next if fo.directory?
+
+        File.open(fo.to_s, 'a') {|f| f.puts self }
+      end
+    when String
+      File.open(other, 'a') {|f| f.puts self }
+    else
+      raise "Unknown piping type: #{other.class}"
+    end
+  
+    other
+  end
+
+  def >(other)
+    case other
+    when Chitin::FileObject
+      other.to_a.each do |fo|
+        next if fo.directory?
+
+        File.open(fo.to_s, 'w') {|f| f.puts self }
+      end
+    when String
+      File.open(other, 'w') {|f| f.puts self }
+    else
+      raise "Unknown piping type: #{other.class}"
+    end
+  
+    other
+  end
+
+  def |(other)
+    NULLIN > L { self } | other
+  end
 end
 

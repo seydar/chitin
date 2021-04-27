@@ -7,17 +7,21 @@ module Chitin
   
     attr_reader :config
     attr_reader :editor
+    attr_reader :last_elapsed
   
     def initialize(config=nil)
       @config  = config
       @out     = STDOUT
       @sandbox = Sandbox.new # give it its own private space to work
-      (class << @sandbox; self; end).send :include, @config # include the config and builtins
+
+      # include the config and builtins
+      (class << @sandbox; self; end).send :include, @config
 
       @editor  = Coolline.new do |c|
         # Remove the default of '-' and add support for strings
         # starting after parentheses.
-        c.word_boundaries = [' ', "\t", "(", ")", '[', ']']
+        c.word_boundaries = [' ', "\t", "(", ")", '[', ']', '`', '@', '$', '>',
+                             '<', '=', ';', '|', '&', '{', '}']
         c.history_file    = File.join ENV['HOME'], '.chitin_history'
 
         # Make sure we don't kill the shell accidentally when we're trying to
@@ -40,7 +44,7 @@ module Chitin
           # if there's a quote, remove it. we'll add it back in later, but it ruins
           # searching so we need it removed for now.
           unquoted_line = ['"', '\''].include?(line[0, 1]) ? line[1..-1] : line
-  
+
           Dir[unquoted_line + '*'].map do |w|
             slash_it = File.directory?(w) and line[-1] != '/' and w[-1] != '/'
   
@@ -62,6 +66,9 @@ module Chitin
       while (val = read)
         next if val.empty?
   
+        # a little bit of infrastructure for timing purposes
+        timing = Time.now
+
         begin
           res = evaluate val
           display res unless val.lstrip[0, 1] == '#'
@@ -72,6 +79,8 @@ module Chitin
           puts "#{e.message} (#{e.class})"
           e.backtrace[1..-1].each {|l| puts "\t#{l}" }
           nil
+        ensure
+          @last_elapsed = Time.now - timing
         end
   
       end
@@ -104,6 +113,7 @@ module Chitin
     # to make the whole thing a generator so that original frame would be saved.
     # why did i write those lines. that makes no sense.
     # AH now i remember. we need to save a frame and use that frame as a sandbox.
+    # ok now i have no clue what the above four lines mean
     def evaluate(val)
       val.strip!
       @config.pre_processing[:default].each {|p| val = p.call val }
@@ -123,14 +133,13 @@ module Chitin
         res[:out].stat == STDOUT.stat)
     end
 
-    def all_not_ruby?(res)
+    def all_shell?(res)
       if Array === res
          !res.empty? && res.map {|r| not returning_ruby? r }.all?
       else
         not returning_ruby? res
       end
     end
-    alias_method :all_shell?, :all_not_ruby?
   
     def display(res)
       # The reason that this is here instead of in #evaluate is that
@@ -175,5 +184,10 @@ module Chitin
     def print(*args)
       @out.print *args
     end
+
+    def inspect
+      "#<Chitin::Session #{object_id}>"
+    end
   end
 end
+

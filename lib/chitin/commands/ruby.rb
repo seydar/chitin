@@ -1,5 +1,5 @@
 module Chitin
-  class StringMethod
+  class PVC
     __sweep__ :[]
 
     include Runnable
@@ -26,8 +26,13 @@ module Chitin
 
     private
 
+    # prepare the initial input to be sent down through `@chains`
+    def prepare
+      self[:in]
+    end
+
     def result
-      val = self[:in].read
+      val = prepare
       @chains.each do |arr|
         val = if Proc === arr.last
                 val.send *arr[0..-2], &arr[-1]
@@ -88,10 +93,28 @@ module Chitin
     end
   
     def inspect
+      "#<PVC #{to_s}>"
+    end
+  end
+
+  class StringMethod < PVC
+    private
+
+    # the only difference is that we have `self[:in]`
+    # instead of just `self[:in].read`
+    def prepare
+      self[:in].read
+    end
+
+    def inspect
       "#<StringMethod #{to_s}>"
     end
   end
 end
+
+# I'm leaving this all here because it's important in understanding the
+# motivation for the above classes (PVC and StringMethod).
+# But the Proc stuff below was replaced by PVC above.
 
 # class Proc
 #   # So let's quick chat about what including Runnable to a proc means.

@@ -2,6 +2,7 @@ class Object
 
   # it does NOT return self, but rather the value of block.
   # if no block is given, it returns nil
+  # it's the equivalent of `with(object=nil) {|obj| blah }`
   def bottle # since it's not tap
     if block_given?
       yield self
